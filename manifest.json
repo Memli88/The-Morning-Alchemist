@@ -1,23 +1,25 @@
 {
-  "name": "Morning Kriya Reset",
-  "short_name": "Kriya Reset",
-  "description": "A full-body morning kriya practice to cleanse, charge, circulate, and integrate energy.",
+  "name": "The Morning Alchemist",
+  "short_name": "Alchemist",
+  "description": "A transformative routine combining TCM, Kundalini, and Animal Flow to boost VO2 Max and DHEA.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#020617",
-  "theme_color": "#020617",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
   "orientation": "portrait",
   "icons": [
     {
       "src": "icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
