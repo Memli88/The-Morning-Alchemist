@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>The Morning Alchemist</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="The Alchemist">
+
+<style>
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+  background: #0f172a;
+  color: #e5e7eb;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  width: 94%;
+  max-width: 480px;
+  text-align: center;
+}
+
+h1 {
+  font-size: 1.3rem;
+  margin-bottom: 0.2rem;
+  background: linear-gradient(to right, #60a5fa, #c084fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.phase {
+  font-size: 0.95rem;
+  color: #93c5fd;
+  margin-top: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.movement {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-top: 0.5rem;
+  color: #fff;
+}
+
+.timer {
+  font-size: 3.8rem;
+  font-weight: 300;
+  margin: 0.8rem 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.description {
+  font-size: 0.95rem;
+  opacity: 0.9;
+  line-height: 1.5;
+  background: rgba(255,255,255,0.05);
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 5px;
+}
+
+.bandha {
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  color: #a7f3d0;
+  font-weight: 500;
+}
+
+.next {
+  font-size: 0.8rem;
+  opacity: 0.6;
+  margin-top: 0.8rem;
+}
+
+.controls {
+  margin-top: 15px;
+}
+
+.controls button {
+  margin: 6px;
+  padding: 12px 18px;
+  font-size: 1rem;
+  border-radius: 12px;
+  border: none;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.1s;
+}
+
+.controls button:active {
+  transform: scale(0.96);
+}
+
+.secondary { background: #334155 !important; }
+
+#progressWrapper {
+  position: fixed;
+  bottom: 28px;
+  left: 5%;
+  width: 90%;
+}
+
+#progressTime {
+  text-align: center;
+  font-size: 0.8rem;
+  opacity: 0.7;
+  margin-bottom: 6px;
+}
+
+#progressContainer {
+  width: 100%;
+  height: 6px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+#progressBar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(to right, #38bdf8, #818cf8);
+  border-radius: 6px;
+  transition: width 1s linear;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h1>⚡ The Morning Alchemist</h1>
+
+  <div class="phase" id="phase"></div>
+  <div class="movement" id="movement"></div>
+  <div class="timer" id="timer">00:00</div>
+  <div class="description" id="description"></div>
+  <div class="bandha" id="bandha"></div>
+  <div class="next" id="next"></div>
+
+  <div class="controls">
+    <button class="secondary" onclick="prev()">⏮</button>
+    <button onclick="start()">▶</button>
+    <button onclick="pause()">⏸</button>
+    <button class="secondary" onclick="next()">⏭</button>
+  </div>
+
+  <div class="controls">
+    <button class="secondary" onclick="reset()">🔄 Reset</button>
+  </div>
+</div>
+
+<div id="progressWrapper">
+  <div id="progressTime"></div>
+  <div id="progressContainer">
+    <div id="progressBar"></div>
+  </div>
+</div>
+
+<video id="wakelock" loop muted playsinline style="display:none">
+  <source src="data:video/mp4;base64,AAAAHGZ0eXBpc29tAAACAGlzb20AAABtb292AAAAAGxtdmhkAAAAAAAAAAAAAAAAAAAD6AAAA+gAAQAAAQAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAAABkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" type="video/mp4">
+</video>
+
+<script>
+/* SERVICE WORKER */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
+
+/* PRACTICE DATA - REPLACED WITH NEW ROUTINE */
+const practice = [
+{
+  phase: "Phase 1: Lymphatic Purge",
+  steps: [
+    {
+      name: "Sacred Shaking (Zi Fa Gong)",
+      time: 120,
+      desc: "Bounce from heels. Shake whole body. Inhale nose, sigh out mouth. Release gray smoke/stress from fingertips.",
+      bandha: "None (Relax Pelvic Floor)"
+    },
+    {
+      name: "Door of Life Knocking",
+      time: 60,
+      desc: "Swing torso left/right. Fist taps lower belly, other hand taps kidneys. Look over shoulder.",
+      bandha: "None"
+    }
+  ]
+},
+{
+  phase: "Phase 2: The Electric Spine",
+  steps: [
+    {
+      name: "Spinal Flex (Camel Ride)",
+      time: 120,
+      desc: "Hands on ankles. Inhale arch forward, exhale round back. Increase speed last 30s to generate heat.",
+      bandha: "Light Mula Bandha on Inhale"
+    },
+    {
+      name: "Breath of Fire + The Squeeze",
+      time: 120,
+      desc: "Arms 60°, thumbs aim up. Rapid nose breath. LAST 10s: Inhale, hold, SQUEEZE root & belly, push energy to brain.",
+      bandha: "Mula + Uddiyana (The Lock)"
+    }
+  ]
+},
+{
+  phase: "Phase 3: Flow State (VO2 Max)",
+  steps: [
+    {
+      name: "Hybrid Beast Flow (Round 1)",
+      time: 240,
+      desc: "Loop: Down Dog → Spinal Wave → Loaded Beast → Front Step Through → Crab Reach → Vinyasa.",
+      bandha: "Uddiyana Bandha (Core Engaged)"
+    },
+    {
+      name: "Hybrid Beast Flow (Round 2)",
+      time: 240,
+      desc: "Increase tempo. Explosive movements. Maintain Ujjayi breath. Keep the flow continuous.",
+      bandha: "Uddiyana Bandha"
+    }
+  ]
+},
+{
+  phase: "Phase 4: Coherence & Chemistry",
+  steps: [
+    {
+      name: "Heart Coherence Breathing",
+      time: 180,
+      desc: "Sit still. Hands on Heart. Inhale 5s, Exhale 5s directly through chest center.",
+      bandha: "None (Heart Focus)"
+    },
+    {
+      name: "Elevated Emotion (Lock-In)",
+      time: 120,
+      desc: "Feel overwhelming Gratitude/Love as if prayers are already answered. Signal genes for repair.",
+      bandha: "None (Emotional Signature)"
+    }
+  ]
+}
+];
+
+/* STATE */
+let s = 0, m = 0;
+let time = practice[0].steps[0].time;
+let interval = null;
+
+/* UI */
+const phaseEl = document.getElementById("phase");
+const movementEl = document.getElementById("movement");
+const timerEl = document.getElementById("timer");
+const descEl = document.getElementById("description");
+const bandhaEl = document.getElementById("bandha");
+const nextEl = document.getElementById("next");
+const progressBar = document.getElementById("progressBar");
+const progressTime = document.getElementById("progressTime");
+
+/* AUDIO */
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function beep() {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.frequency.value = 880;
+  gain.gain.value = 0.1;
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.15);
+}
+
+/* TOTAL TIME */
+const totalTime = practice.reduce(
+  (sum, p) => sum + p.steps.reduce((a,b)=>a+b.time,0), 0
+);
+
+function elapsed() {
+  let e = 0;
+  for (let i=0;i<s;i++)
+    e += practice[i].steps.reduce((a,b)=>a+b.time,0);
+  for (let j=0;j<m;j++)
+    e += practice[s].steps[j].time;
+  e += practice[s].steps[m].time - time;
+  return e;
+}
+
+/* RENDER */
+function render() {
+  const step = practice[s].steps[m];
+  phaseEl.textContent = practice[s].phase;
+  movementEl.textContent = step.name;
+  descEl.textContent = step.desc;
+  bandhaEl.textContent = "Focus: " + step.bandha;
+
+  const nxt = getNext();
+  nextEl.textContent = nxt ? `Next → ${nxt.name}` : "";
+
+  timerEl.textContent =
+    `${Math.floor(time/60).toString().padStart(2,"0")}:${(time%60).toString().padStart(2,"0")}`;
+
+  progressBar.style.width = `${(elapsed()/totalTime)*100}%`;
+  progressTime.textContent =
+    `${Math.floor(elapsed()/60)}:${(elapsed()%60).toString().padStart(2,"0")} / ${Math.floor(totalTime/60)}:${(totalTime%60).toString().padStart(2,"0")}`;
+}
+
+/* CONTROLS */
+function start() {
+  if (interval) return;
+  audioCtx.resume();
+  beep();
+  document.getElementById("wakelock").play().catch(()=>{});
+  interval = setInterval(() => {
+    time--;
+    if (time < 0) next(true);
+    render();
+  }, 1000);
+}
+
+function pause() {
+  clearInterval(interval);
+  interval = null;
+  document.getElementById("wakelock").pause();
+}
+
+function reset() {
+  pause();
+  s = 0; m = 0;
+  time = practice[0].steps[0].time;
+  render();
+}
+
+function next(auto=false) {
+  m++;
+  if (m >= practice[s].steps.length) {
+    m = 0; s++;
+    if (s >= practice.length) {
+      pause();
+      movementEl.textContent = "Practice Complete ⚡";
+      descEl.textContent = "You have upgraded your state.";
+      bandhaEl.textContent = "Carry this energy.";
+      timerEl.textContent = "";
+      nextEl.textContent = "";
+      return;
+    }
+  }
+  time = practice[s].steps[m].time;
+  beep();
+}
+
+function prev() {
+  m--;
+  if (m < 0) {
+    s--;
+    if (s < 0) { s = 0; m = 0; }
+    else m = practice[s].steps.length - 1;
+  }
+  time = practice[s].steps[m].time;
+}
+
+function getNext() {
+  if (m+1 < practice[s].steps.length) return practice[s].steps[m+1];
+  if (s+1 < practice.length) return practice[s+1].steps[0];
+  return null;
+}
+
+render();
+</script>
+
+</body>
+</html>
